@@ -2,3 +2,4 @@ nem-config.json
 node_modules
 *.wlt
 *.DS_STORE
+*.idea
