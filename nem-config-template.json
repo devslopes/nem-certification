@@ -1,0 +1,18 @@
+{
+  "walletPath": "./mywallet.wlt",
+  "walletPassword": "12345678",
+  "mosaicForReward": "cache",
+  "mosaicNamespace": "devslopes",
+  "certifications": {
+    "Devslopes Apple Code for Cache Exam": {
+      "namespace": "devslopes.exams",
+      "mosaicName": "cache-for-code-apple-exam",
+      "reward": 100000000
+    },
+    "Devslopes Android Code for Cache Exam": {
+      "namespace": "devslopes.exams",
+      "mosaicName": "cache-for-code-android-exam",
+      "reward": 250000000
+    }
+  }
+}
