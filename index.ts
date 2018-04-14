@@ -17,18 +17,12 @@ import {
 	NemAnnounceResult
 } from 'nem-library';
 const fs = require('fs');
-import * as NodeCache from 'node-cache';
 import { Observable } from 'rxjs/Observable';
-const nemConfig = require('./nem-config');
+const nemConfig = require('./nem-config.json');
 
 NEMLibrary.bootstrap(NetworkTypes.TEST_NET);
 const transactionHttp = new TransactionHttp();
 const mosaicHttp = new MosaicHttp();
-/**
- * Store pending transactions temporarily in memory
- * @type {NodeCache}
- */
-const cacheDB = new NodeCache();
 
 export interface CertificationGroup {
 	namespace: string;
@@ -53,13 +47,14 @@ export interface CertificationTransfer {
  */
 export const processCertification = async (address: string, certName: string) => {
 	try {
-		// Only proceed if cert not already owned
-		const isOwned = await certificationOwned(address, certName);
-		if (isOwned) return;
-
 		// Grab data from config json file
 		const cert: CertificationGroup = nemConfig.certifications[certName];
+		if (!cert) throw Error('Invalid certification name');
 		const mosaicId = new MosaicId(cert.namespace, cert.mosaicName);
+
+		// Only proceed if cert not already owned
+		const isOwned = await certificationOwned(address, cert.mosaicName);
+		if (isOwned) throw Error('This certification is already owned by address');
 
 		// Create 1 new certification asset
 		const certCreated = await createCertifcationMosaic(mosaicId);
@@ -144,7 +139,7 @@ export const transferMosaics = (certTransfer: CertificationTransfer): Promise<Ne
 		const transactionHttp = new TransactionHttp();
 		Observable.from([
 			mosaicHttp.getMosaicTransferableWithAmount(certTransfer.certMosaicId, 1),
-			mosaicHttp.getMosaicTransferableWithAmount(certTransfer.rewardMosaicId, certTransfer.rewardAmount)])
+			mosaicHttp.getMosaicTransferableWithAmount(certTransfer.rewardMosaicId, certTransfer.rewardAmount / 1e6)])
 			.flatMap(transfer => transfer)
 			.toArray()
 			.map(mosaics => TransferTransaction.createWithMosaics(
